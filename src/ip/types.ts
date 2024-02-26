@@ -4,4 +4,19 @@ export type IPObject = {
   version: IPVersion
   numericIP: bigint
 }
-export type CheckIPType = IPVersion | "invalid"
+export type CheckIPVersionType = IPVersion | "invalid"
+
+export type IPv4Types =
+  | "Public"
+  | "Private"
+  | "Loopback"
+  | "Link-Local"
+  | "Multicast"
+  | "Broadcast"
+  | "Documentation"
+  | "Software"
+  | "Future"
+  | "Other"
+export type IPv6Types = "Public"
+
+export type IPAddressTypes = IPv4Types | IPv6Types

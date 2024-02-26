@@ -1,4 +1,12 @@
-import type { CheckIPType, IPObject, IPVersion } from "./types"
+import { CONSTS } from "./consts"
+import type {
+  CheckIPVersionType,
+  IPAddressTypes,
+  IPObject,
+  IPVersion,
+  IPv4Types,
+  IPv6Types,
+} from "./types"
 
 const ipv4Pattern =
   /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})(\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})){3}$/
@@ -11,7 +19,7 @@ export class IPAddress {
   private _version: IPVersion
 
   private constructByString(ip: string) {
-    const ipType = IPAddress.checkIPType(ip)
+    const ipType = IPAddress.checkIPVersion(ip)
     if (ipType === "invalid") throw new Error(`Invalid IP address: ${ip}`)
 
     return {
@@ -132,14 +140,149 @@ export class IPAddress {
    * Check the type of IP address and return the type.
    *
    * @param {string} ip - the IP address to be checked
-   * @return {CheckIPType} the type of the IP address (v4, v6, or invalid)
+   * @return {CheckIPVersionType} the type of the IP address (v4, v6, or invalid)
    */
-  static checkIPType(ip: string): CheckIPType {
+  static checkIPVersion(ip: string): CheckIPVersionType {
     const ipaddress = ip.replace(/^\[|\]$/g, "")
 
     if (ipv4Pattern.test(ipaddress)) return "v4"
     if (ipv6Pattern.test(ipaddress)) return "v6"
 
     return "invalid"
+  }
+
+  private checkIPV4Local(integer: bigint) {
+    const privateSubnets = [
+      {
+        start: CONSTS.IPV4.SUBNET_PRIVATE_10_START,
+        end: CONSTS.IPV4.SUBNET_PRIVATE_10_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_PRIVATE_172_START,
+        end: CONSTS.IPV4.SUBNET_PRIVATE_172_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_PRIVATE_192_START,
+        end: CONSTS.IPV4.SUBNET_PRIVATE_192_END,
+      },
+    ]
+
+    for (const subnet of privateSubnets) {
+      if (integer >= subnet.start && integer <= subnet.end) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private checkIPV4Documentation(integer: bigint) {
+    const documentationSubnets = [
+      {
+        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_192_START,
+        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_192_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_198_START,
+        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_198_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_203_START,
+        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_203_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_233_START,
+        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_233_END,
+      },
+    ]
+
+    for (const subnet of documentationSubnets) {
+      if (integer >= subnet.start && integer <= subnet.end) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private checkIPV4Other(integer: bigint) {
+    const otherSubnets = [
+      {
+        start: CONSTS.IPV4.SUBNET_OTHER_100_START,
+        end: CONSTS.IPV4.SUBNET_OTHER_100_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_OTHER_192_START,
+        end: CONSTS.IPV4.SUBNET_OTHER_192_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_OTHER_192_88_START,
+        end: CONSTS.IPV4.SUBNET_OTHER_192_88_END,
+      },
+      {
+        start: CONSTS.IPV4.SUBNET_OTHER_198_START,
+        end: CONSTS.IPV4.SUBNET_OTHER_198_END,
+      },
+    ]
+
+    for (const subnet of otherSubnets) {
+      if (integer >= subnet.start && integer <= subnet.end) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private getIPV4AddressType(): IPv4Types {
+    const ipInteger = this._numeric_ip
+
+    if (this.checkIPV4Local(ipInteger)) return "Private"
+    if (this.checkIPV4Documentation(ipInteger)) return "Documentation"
+    if (this.checkIPV4Other(ipInteger)) return "Other"
+    if (
+      ipInteger >= CONSTS.IPV4.SUBNET_LINK_LOCAL_START &&
+      ipInteger <= CONSTS.IPV4.SUBNET_LINK_LOCAL_END
+    )
+      return "Link-Local"
+    if (
+      ipInteger >= CONSTS.IPV4.SUBNET_LOOPBACK_START &&
+      ipInteger <= CONSTS.IPV4.SUBNET_LOOPBACK_END
+    )
+      return "Loopback"
+    if (
+      ipInteger >= CONSTS.IPV4.SUBNET_SOFTWARE_START &&
+      ipInteger <= CONSTS.IPV4.SUBNET_SOFTWARE_END
+    )
+      return "Software"
+    if (
+      ipInteger >= CONSTS.IPV4.SUBNET_MULTICAST_START &&
+      ipInteger <= CONSTS.IPV4.SUBNET_MULTICAST_END
+    )
+      return "Multicast"
+    if (
+      ipInteger >= CONSTS.IPV4.SUBNET_FUTURE_240_START &&
+      ipInteger <= CONSTS.IPV4.SUBNET_FUTURE_240_END
+    )
+      return "Future"
+    if (ipInteger === CONSTS.IPV4.BROADCAST_ADDRESS) return "Broadcast"
+
+    return "Public"
+  }
+
+  private getIPV6AddressType(): IPv6Types {
+    throw Error("Not implemented")
+  }
+
+  public getIPAddressType(): IPAddressTypes {
+    if (this._version === "v4") {
+      return this.getIPV4AddressType()
+    } else {
+      return this.getIPV6AddressType()
+    }
+  }
+
+  public toString() {
+    return this._ip
   }
 }
