@@ -1,6 +1,23 @@
 {
   "name": "ip-alchemy",
-  "module": "index.ts",
+  "description": "An IP address manipulation library",
+  "keywords": [
+    "ip",
+    "cidr",
+    "ipv4",
+    "ipv6"
+  ],
+  "license": "MIT",
+  "version": "0.1.0",
+  "author": {
+    "name": "Diogo Passos",
+    "url": "https://diogopassos.pt"
+  },
+  "homepage": "https://github.com/gngz/ip-alchemy",
+  "bugs": {
+    "url": "https://github.com/gngz/ip-alchemy/issues"
+  },
+  "module": "index.js",
   "type": "module",
   "devDependencies": {
     "@commitlint/cli": "^18.6.1",
