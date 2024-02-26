@@ -19,7 +19,8 @@ export class IPAddress {
   }
 
   private constructByInt(ip: bigint) {
-    const numberOfBits = ip.toString(2).length
+    // convert to binary string and remove leading zeros
+    const numberOfBits = ip.toString(2).replace(/^0+/, "").length
 
     return {
       ip: numberOfBits > 32 ? this.intToIpv6(ip) : this.intToIpv4(ip),

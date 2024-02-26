@@ -1,1 +1,4 @@
-export type CIDRArgs = [ip: string, prefix: number] | [cidr: string]
+export type CIDRArgs =
+  | [cidr: string]
+  | [ip: string, prefix: number]
+  | [firstIP: string, lastIP: string]
