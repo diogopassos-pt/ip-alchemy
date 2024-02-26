@@ -121,6 +121,60 @@ export class IPAddress {
     return new IPAddress(integer)
   }
 
+  /**
+   * Converts the IP address to a byte array representation.
+   *
+   * @return {number[]} The byte array representation of the IP address.
+   */
+  public toByteArray(): number[] {
+    let integer = this._numeric_ip
+    const byteArray = Array<number>()
+
+    const length = this._version === "v4" ? 4 : 16
+
+    while (integer > 0n) {
+      const byte = Number(integer & 0xffn)
+      byteArray.unshift(byte ?? 0x00)
+      integer >>= 8n
+    }
+
+    while (byteArray.length < length) {
+      byteArray.unshift(0)
+    }
+
+    return byteArray
+  }
+
+  /**
+   * Converts a byte array to an IPAddress object.
+   *
+   * @param {number[]} bytes - the array of bytes to be converted
+   * @return {IPAddress} the IPAddress object created from the byte array
+   */
+  public fromByteArray(bytes: number[]) {
+    if (bytes.length === 4) {
+      const integer =
+        (BigInt(bytes[0]) << 24n) +
+        (BigInt(bytes[1]) << 16n) +
+        (BigInt(bytes[2]) << 8n) +
+        BigInt(bytes[3])
+
+      return IPAddress.fromNumeric(integer)
+    }
+
+    if (bytes.length === 16) {
+      const integer = bytes.reduce(
+        (acc, byte, index) =>
+          acc + (BigInt(byte) << BigInt(8 * (16 - 1 - index))),
+        0n
+      )
+
+      return IPAddress.fromNumeric(integer)
+    }
+
+    throw new Error("Invalid IP byte array")
+  }
+
   public get version() {
     return this._version
   }
@@ -148,6 +202,18 @@ export class IPAddress {
       return IPAddress.parse(other)._numeric_ip === this._numeric_ip
     }
     return this._numeric_ip === other._numeric_ip
+  }
+
+  /**
+   * A getter for retrieving the octets of the IP address if the version is "v4".
+   *
+   * @return {string[]} The array of octets in the IP address if the version is "v4", otherwise undefined.
+   */
+  get octets() {
+    if (this._version === "v4") {
+      return this._ip.split(".")
+    }
+    return undefined
   }
 
   public toString() {
