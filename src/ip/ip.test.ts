@@ -9,6 +9,13 @@ describe("IPAddress", () => {
   it("should create an ipv6 IPAddress object", () => {
     const ip = IPAddress.parse("::1")
     expect(ip.version).toBe("v6")
+    expect(ip.toInt()).toBe(1n)
+  })
+
+  it("should create an software ipv6 IPAddress object", () => {
+    const ip = IPAddress.parse("::")
+    expect(ip.version).toBe("v6")
+    expect(ip.toInt()).toBe(0n)
   })
 
   it("should return the ip address in string format", () => {
