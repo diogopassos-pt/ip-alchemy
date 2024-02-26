@@ -36,7 +36,7 @@ export class CIDR {
     }
 
     if (
-      this.baseIP.getIPAddressType() &&
+      this.baseIP.getIPAddressType() ===
       this.getBroadcastAddress().getIPAddressType()
     ) {
       return this.baseIP.getIPAddressType()
@@ -46,13 +46,16 @@ export class CIDR {
   }
 
   public getNetworkAddress() {
-    return this.baseIP.toString()
+    return this.baseIP
   }
 
   public getBroadcastAddress() {
     if (this.baseIP.version === "v6")
       throw new IPv6Error("IPv6 doesn't have a broadcast address")
-    return IPAddress.fromNumeric(this.baseIP.toInt() | this.hostMask)
+
+    return IPAddress.fromNumeric(
+      BigInt.asIntN(32, this.baseIP.toInt() | this.hostMask)
+    )
   }
 
   public getNetworkMaskAddress() {
