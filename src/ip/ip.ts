@@ -1,16 +1,6 @@
-import type {
-  CheckIPVersionType,
-  IPAddressTypes,
-  IPObject,
-  IPVersion,
-  IPv6Types,
-} from "./types"
+import type { IPAddressTypes, IPObject, IPVersion, IPv6Types } from "./types"
 import { getIPV4AddressType } from "./utils/ipv4"
-
-const ipv4Pattern =
-  /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})(\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})){3}$/
-const ipv6Pattern =
-  /^(?:(?:[0-9a-fA-F]{1,4}:){6,6}(?::[0-9a-fA-F]{1,4})?|(?:[0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}|::1?)$/
+import { checkIPVersion } from "./utils/version"
 
 export class IPAddress {
   private _ip: string
@@ -18,7 +8,7 @@ export class IPAddress {
   private _version: IPVersion
 
   private constructByString(ip: string) {
-    const ipType = IPAddress.checkIPVersion(ip)
+    const ipType = checkIPVersion(ip)
     if (ipType === "invalid") throw new Error(`Invalid IP address: ${ip}`)
 
     return {
@@ -133,21 +123,6 @@ export class IPAddress {
 
   public get version() {
     return this._version
-  }
-
-  /**
-   * Check the type of IP address and return the type.
-   *
-   * @param {string} ip - the IP address to be checked
-   * @return {CheckIPVersionType} the type of the IP address (v4, v6, or invalid)
-   */
-  static checkIPVersion(ip: string): CheckIPVersionType {
-    const ipaddress = ip.replace(/^\[|\]$/g, "")
-
-    if (ipv4Pattern.test(ipaddress)) return "v4"
-    if (ipv6Pattern.test(ipaddress)) return "v6"
-
-    return "invalid"
   }
 
   private getIPV6AddressType(): IPv6Types {
