@@ -16,6 +16,12 @@ Just install with your favorite dependency manager
   pnpm add ip-alchemy
 ```
 
+## Usage
+
+```typescript
+Work in progress
+```
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first
