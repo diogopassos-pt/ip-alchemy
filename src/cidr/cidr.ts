@@ -1,4 +1,4 @@
-import { IPAddress } from "../ip"
+import { IPAddress, IPAddressTypes } from "../ip"
 import { hostMaskFromMask, prefixToMask } from "./utils/masks"
 
 type CIDRArgs = [ip: string, prefix: number] | [cidr: string]
@@ -23,28 +23,55 @@ export class CIDR {
     this.hostMask = hostMaskFromMask(this.mask, this.baseIP.version)
   }
 
+  public getNetworkType(): IPAddressTypes {
+    if (this.baseIP.version === "v6") {
+      if (
+        this.baseIP.getIPAddressType() ===
+        this.getLastUsableAddress().getIPAddressType()
+      )
+        return this.baseIP.getIPAddressType()
+
+      throw new Error("Invalid Subnet")
+    }
+
+    if (
+      this.baseIP.getIPAddressType() &&
+      this.getBroadcastAddress().getIPAddressType()
+    ) {
+      return this.baseIP.getIPAddressType()
+    }
+
+    throw new Error("Invalid Subnet")
+  }
+
   public getNetworkAddress() {
     return this.baseIP.toString()
   }
 
   public getBroadcastAddress() {
-    return IPAddress.fromNumeric(this.baseIP.toInt() | this.hostMask).toString()
+    if (this.baseIP.version === "v6")
+      throw new Error("IPv6 doesn't have a broadcast address")
+    return IPAddress.fromNumeric(this.baseIP.toInt() | this.hostMask)
   }
 
   public getNetworkMaskAddress() {
     return IPAddress.fromNumeric(this.mask).toString()
   }
 
+  public getHostMaskAddress() {
+    return IPAddress.fromNumeric(this.hostMask).toString()
+  }
+
   public getFirstUsableAddress() {
     return IPAddress.fromNumeric(
       this.baseIP.toInt() + (this.baseIP.version === "v4" ? 1n : 0n)
-    ).toString()
+    )
   }
 
   public getLastUsableAddress() {
     return IPAddress.fromNumeric(
       (this.baseIP.toInt() | this.hostMask) -
         (this.baseIP.version === "v4" ? 1n : 0n)
-    ).toString()
+    )
   }
 }
