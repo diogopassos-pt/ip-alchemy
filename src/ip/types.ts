@@ -17,6 +17,17 @@ export type IPv4Types =
   | "Software"
   | "Future"
   | "Other"
-export type IPv6Types = "Public"
+
+export type IPv6Types =
+  | "Public"
+  | "Private"
+  | "Software"
+  | "Loopback"
+  | "Link-Local"
+  | "Documentation"
+  | "Multicast"
+  | "Discard"
+  | "Other"
+  | "Future"
 
 export type IPAddressTypes = IPv4Types | IPv6Types
