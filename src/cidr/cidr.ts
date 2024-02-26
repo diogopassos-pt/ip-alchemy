@@ -1,7 +1,7 @@
 import { IPAddress, IPAddressTypes } from "../ip"
+import { CIDRArgs } from "./types"
 import { hostMaskFromMask, prefixToMask } from "./utils/masks"
 
-type CIDRArgs = [ip: string, prefix: number] | [cidr: string]
 export class CIDR {
   private baseIP: IPAddress
   private prefix: bigint
