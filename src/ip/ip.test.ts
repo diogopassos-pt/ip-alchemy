@@ -29,6 +29,11 @@ describe("IPAddress", () => {
     expect(ip.toByteArray()).toStrictEqual([0xff, 0xff, 0xff, 0xff])
   })
 
+  it("ipv4 to octets", () => {
+    const ip = IPAddress.parse("255.255.255.255")
+    expect(ip.octets).toStrictEqual(["255", "255", "255", "255"])
+  })
+
   it("to byte array ipv4 software address", () => {
     const ip = IPAddress.parse("0.0.0.0")
     expect(ip.toByteArray()).toStrictEqual([0x00, 0x00, 0x00, 0x00])
