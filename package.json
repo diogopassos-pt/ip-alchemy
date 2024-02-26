@@ -41,6 +41,6 @@
     "prepare": "husky",
     "format": "prettier --write ./src",
     "lint": "eslint ./src",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   }
 }
