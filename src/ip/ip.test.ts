@@ -9,6 +9,35 @@ describe("IPAddress", () => {
   it("should create an ipv6 IPAddress object", () => {
     const ip = IPAddress.parse("::1")
     expect(ip.version).toBe("v6")
+    expect(ip.toInt()).toBe(1n)
+  })
+
+  it("to byte array ipv4", () => {
+    const ip = IPAddress.parse("127.0.0.1")
+    expect(ip.toByteArray()).toStrictEqual([127, 0, 0, 1])
+  })
+
+  it("to byte array ipv6", () => {
+    const ip = IPAddress.parse("::1")
+    expect(ip.toByteArray()).toStrictEqual([
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+    ])
+  })
+
+  it("to byte array ipv4 broadcast", () => {
+    const ip = IPAddress.parse("255.255.255.255")
+    expect(ip.toByteArray()).toStrictEqual([0xff, 0xff, 0xff, 0xff])
+  })
+
+  it("to byte array ipv4 software address", () => {
+    const ip = IPAddress.parse("0.0.0.0")
+    expect(ip.toByteArray()).toStrictEqual([0x00, 0x00, 0x00, 0x00])
+  })
+
+  it("should create an software ipv6 IPAddress object", () => {
+    const ip = IPAddress.parse("::")
+    expect(ip.version).toBe("v6")
+    expect(ip.toInt()).toBe(0n)
   })
 
   it("should return the ip address in string format", () => {

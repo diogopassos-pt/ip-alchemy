@@ -1,17 +1,6 @@
-import { CONSTS } from "./consts"
-import type {
-  CheckIPVersionType,
-  IPAddressTypes,
-  IPObject,
-  IPVersion,
-  IPv4Types,
-  IPv6Types,
-} from "./types"
-
-const ipv4Pattern =
-  /^(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})(\.(25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})){3}$/
-const ipv6Pattern =
-  /^(?:(?:[0-9a-fA-F]{1,4}:){6,6}(?::[0-9a-fA-F]{1,4})?|(?:[0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}|::1?)$/
+import type { IPAddressTypes, IPObject, IPVersion, IPv6Types } from "./types"
+import { getIPV4AddressType } from "./utils/ipv4"
+import { checkIPVersion } from "./utils/version"
 
 export class IPAddress {
   private _ip: string
@@ -19,7 +8,7 @@ export class IPAddress {
   private _version: IPVersion
 
   private constructByString(ip: string) {
-    const ipType = IPAddress.checkIPVersion(ip)
+    const ipType = checkIPVersion(ip)
     if (ipType === "invalid") throw new Error(`Invalid IP address: ${ip}`)
 
     return {
@@ -132,142 +121,62 @@ export class IPAddress {
     return new IPAddress(integer)
   }
 
-  public get version() {
-    return this._version
+  /**
+   * Converts the IP address to a byte array representation.
+   *
+   * @return {number[]} The byte array representation of the IP address.
+   */
+  public toByteArray(): number[] {
+    let integer = this._numeric_ip
+    const byteArray = Array<number>()
+
+    const length = this._version === "v4" ? 4 : 16
+
+    while (integer > 0n) {
+      const byte = Number(integer & 0xffn)
+      byteArray.unshift(byte ?? 0x00)
+      integer >>= 8n
+    }
+
+    while (byteArray.length < length) {
+      byteArray.unshift(0)
+    }
+
+    return byteArray
   }
 
   /**
-   * Check the type of IP address and return the type.
+   * Converts a byte array to an IPAddress object.
    *
-   * @param {string} ip - the IP address to be checked
-   * @return {CheckIPVersionType} the type of the IP address (v4, v6, or invalid)
+   * @param {number[]} bytes - the array of bytes to be converted
+   * @return {IPAddress} the IPAddress object created from the byte array
    */
-  static checkIPVersion(ip: string): CheckIPVersionType {
-    const ipaddress = ip.replace(/^\[|\]$/g, "")
+  public fromByteArray(bytes: number[]) {
+    if (bytes.length === 4) {
+      const integer =
+        (BigInt(bytes[0]) << 24n) +
+        (BigInt(bytes[1]) << 16n) +
+        (BigInt(bytes[2]) << 8n) +
+        BigInt(bytes[3])
 
-    if (ipv4Pattern.test(ipaddress)) return "v4"
-    if (ipv6Pattern.test(ipaddress)) return "v6"
-
-    return "invalid"
-  }
-
-  private checkIPV4Local(integer: bigint) {
-    const privateSubnets = [
-      {
-        start: CONSTS.IPV4.SUBNET_PRIVATE_10_START,
-        end: CONSTS.IPV4.SUBNET_PRIVATE_10_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_PRIVATE_172_START,
-        end: CONSTS.IPV4.SUBNET_PRIVATE_172_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_PRIVATE_192_START,
-        end: CONSTS.IPV4.SUBNET_PRIVATE_192_END,
-      },
-    ]
-
-    for (const subnet of privateSubnets) {
-      if (integer >= subnet.start && integer <= subnet.end) {
-        return true
-      }
+      return IPAddress.fromNumeric(integer)
     }
 
-    return false
-  }
+    if (bytes.length === 16) {
+      const integer = bytes.reduce(
+        (acc, byte, index) =>
+          acc + (BigInt(byte) << BigInt(8 * (16 - 1 - index))),
+        0n
+      )
 
-  private checkIPV4Documentation(integer: bigint) {
-    const documentationSubnets = [
-      {
-        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_192_START,
-        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_192_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_198_START,
-        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_198_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_203_START,
-        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_203_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_DOCUMENTATION_233_START,
-        end: CONSTS.IPV4.SUBNET_DOCUMENTATION_233_END,
-      },
-    ]
-
-    for (const subnet of documentationSubnets) {
-      if (integer >= subnet.start && integer <= subnet.end) {
-        return true
-      }
+      return IPAddress.fromNumeric(integer)
     }
 
-    return false
+    throw new Error("Invalid IP byte array")
   }
 
-  private checkIPV4Other(integer: bigint) {
-    const otherSubnets = [
-      {
-        start: CONSTS.IPV4.SUBNET_OTHER_100_START,
-        end: CONSTS.IPV4.SUBNET_OTHER_100_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_OTHER_192_START,
-        end: CONSTS.IPV4.SUBNET_OTHER_192_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_OTHER_192_88_START,
-        end: CONSTS.IPV4.SUBNET_OTHER_192_88_END,
-      },
-      {
-        start: CONSTS.IPV4.SUBNET_OTHER_198_START,
-        end: CONSTS.IPV4.SUBNET_OTHER_198_END,
-      },
-    ]
-
-    for (const subnet of otherSubnets) {
-      if (integer >= subnet.start && integer <= subnet.end) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  private getIPV4AddressType(): IPv4Types {
-    const ipInteger = this._numeric_ip
-
-    if (this.checkIPV4Local(ipInteger)) return "Private"
-    if (this.checkIPV4Documentation(ipInteger)) return "Documentation"
-    if (this.checkIPV4Other(ipInteger)) return "Other"
-    if (
-      ipInteger >= CONSTS.IPV4.SUBNET_LINK_LOCAL_START &&
-      ipInteger <= CONSTS.IPV4.SUBNET_LINK_LOCAL_END
-    )
-      return "Link-Local"
-    if (
-      ipInteger >= CONSTS.IPV4.SUBNET_LOOPBACK_START &&
-      ipInteger <= CONSTS.IPV4.SUBNET_LOOPBACK_END
-    )
-      return "Loopback"
-    if (
-      ipInteger >= CONSTS.IPV4.SUBNET_SOFTWARE_START &&
-      ipInteger <= CONSTS.IPV4.SUBNET_SOFTWARE_END
-    )
-      return "Software"
-    if (
-      ipInteger >= CONSTS.IPV4.SUBNET_MULTICAST_START &&
-      ipInteger <= CONSTS.IPV4.SUBNET_MULTICAST_END
-    )
-      return "Multicast"
-    if (
-      ipInteger >= CONSTS.IPV4.SUBNET_FUTURE_240_START &&
-      ipInteger <= CONSTS.IPV4.SUBNET_FUTURE_240_END
-    )
-      return "Future"
-    if (ipInteger === CONSTS.IPV4.BROADCAST_ADDRESS) return "Broadcast"
-
-    return "Public"
+  public get version() {
+    return this._version
   }
 
   private getIPV6AddressType(): IPv6Types {
@@ -276,10 +185,35 @@ export class IPAddress {
 
   public getIPAddressType(): IPAddressTypes {
     if (this._version === "v4") {
-      return this.getIPV4AddressType()
+      return getIPV4AddressType(this._numeric_ip)
     } else {
       return this.getIPV6AddressType()
     }
+  }
+
+  /**
+   * Check if the given IPAddress or string is equal to this IPAddress.
+   *
+   * @param {IPAddress | string} other - the IPAddress or string to compare
+   * @return {boolean} true if the IPAddress or string is equal, false otherwise
+   */
+  public equals(other: IPAddress | string) {
+    if (typeof other === "string") {
+      return IPAddress.parse(other)._numeric_ip === this._numeric_ip
+    }
+    return this._numeric_ip === other._numeric_ip
+  }
+
+  /**
+   * A getter for retrieving the octets of the IP address if the version is "v4".
+   *
+   * @return {string[]} The array of octets in the IP address if the version is "v4", otherwise undefined.
+   */
+  get octets() {
+    if (this._version === "v4") {
+      return this._ip.split(".")
+    }
+    return undefined
   }
 
   public toString() {
