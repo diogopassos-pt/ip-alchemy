@@ -27,7 +27,7 @@ export type IPv6Types =
   | "Documentation"
   | "Multicast"
   | "Discard"
-  | "Other"
   | "Future"
+  | "Other"
 
 export type IPAddressTypes = IPv4Types | IPv6Types
