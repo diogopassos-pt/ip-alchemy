@@ -1,4 +1,5 @@
 import { IPAddress, IPAddressTypes } from "../ip"
+import { IPv6Error, SubnetError } from "./errors"
 import { CIDRArgs } from "./types"
 import { hostMaskFromMask, prefixToMask } from "./utils/masks"
 
@@ -31,7 +32,7 @@ export class CIDR {
       )
         return this.baseIP.getIPAddressType()
 
-      throw new Error("Invalid Subnet")
+      throw new SubnetError("First and Last IP has a different address type")
     }
 
     if (
@@ -41,7 +42,7 @@ export class CIDR {
       return this.baseIP.getIPAddressType()
     }
 
-    throw new Error("Invalid Subnet")
+    throw new SubnetError("First and Last IP has a different address type")
   }
 
   public getNetworkAddress() {
@@ -50,7 +51,7 @@ export class CIDR {
 
   public getBroadcastAddress() {
     if (this.baseIP.version === "v6")
-      throw new Error("IPv6 doesn't have a broadcast address")
+      throw new IPv6Error("IPv6 doesn't have a broadcast address")
     return IPAddress.fromNumeric(this.baseIP.toInt() | this.hostMask)
   }
 
