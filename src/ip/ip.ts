@@ -137,6 +137,19 @@ export class IPAddress {
     }
   }
 
+  /**
+   * Check if the given IPAddress or string is equal to this IPAddress.
+   *
+   * @param {IPAddress | string} other - the IPAddress or string to compare
+   * @return {boolean} true if the IPAddress or string is equal, false otherwise
+   */
+  public equals(other: IPAddress | string) {
+    if (typeof other === "string") {
+      return IPAddress.parse(other)._numeric_ip === this._numeric_ip
+    }
+    return this._numeric_ip === other._numeric_ip
+  }
+
   public toString() {
     return this._ip
   }
