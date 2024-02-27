@@ -83,4 +83,28 @@ it("ipv6 address families", () => {
 
   ip = IPAddress.parse("::ffff:192.168.0.1")
   expect(ip.getIPAddressType()).toBe("IPV4-Mapped")
+
+  ip = IPAddress.parse("2001:8a0:6b64:6800:7a98:8942:a460:262")
+  expect(ip.getIPAddressType()).toBe("Public")
+
+  ip = IPAddress.parse("fe80::532d:f7cd:aed8:6f46")
+  expect(ip.getIPAddressType()).toBe("Link-Local")
+
+  ip = IPAddress.parse("2001::4136:e378:8000:63bf:3fff:fdd2")
+  expect(ip.getIPAddressType()).toBe("Teredo")
+
+  ip = IPAddress.parse("fdf8:f53b:82e4::53")
+  expect(ip.getIPAddressType()).toBe("Private")
+
+  ip = IPAddress.parse("2002:cb0a:3cdd:1::1")
+  expect(ip.getIPAddressType()).toBe("6to4")
+
+  ip = IPAddress.parse("2001:10:240:ab::a")
+  expect(ip.getIPAddressType()).toBe("Orchid")
+
+  ip = IPAddress.parse("ff01:0:0:0:0:0:0:2")
+  expect(ip.getIPAddressType()).toBe("Multicast")
+
+  ip = IPAddress.parse("2001:db8:8:4::2")
+  expect(ip.getIPAddressType()).toBe("Documentation")
 })

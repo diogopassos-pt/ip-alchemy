@@ -85,28 +85,31 @@ export class CIDR {
       throw new IPv6Error("IPv6 doesn't have a broadcast address")
 
     return IPAddress.fromNumeric(
-      BigInt.asIntN(32, this._baseIP.toInt() | this._hostMask)
+      BigInt.asIntN(32, this._baseIP.toInt() | this._hostMask),
+      this._baseIP.version
     )
   }
 
   public getNetworkMaskAddress() {
-    return IPAddress.fromNumeric(this._mask).toString()
+    return IPAddress.fromNumeric(this._mask, this._baseIP.version)
   }
 
   public getHostMaskAddress() {
-    return IPAddress.fromNumeric(this._hostMask).toString()
+    return IPAddress.fromNumeric(this._hostMask, this._baseIP.version)
   }
 
   public getFirstUsableAddress() {
     return IPAddress.fromNumeric(
-      this._baseIP.toInt() + (this._baseIP.version === "v4" ? 1n : 0n)
+      this._baseIP.toInt() + (this._baseIP.version === "v4" ? 1n : 0n),
+      this._baseIP.version
     )
   }
 
   public getLastUsableAddress() {
     return IPAddress.fromNumeric(
       (this._baseIP.toInt() | this._hostMask) -
-        (this._baseIP.version === "v4" ? 1n : 0n)
+        (this._baseIP.version === "v4" ? 1n : 0n),
+      this._baseIP.version
     )
   }
 
