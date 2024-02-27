@@ -18,7 +18,7 @@ Just install with your favorite dependency manager
 
 ## Usage
 
-See [Docs]("docs/README.md")
+See [Docs](docs/README.md)
 
 ## Contributing
 
