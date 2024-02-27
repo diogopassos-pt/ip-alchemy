@@ -91,17 +91,11 @@ export class CIDR {
   }
 
   public getNetworkMaskAddress() {
-    return (
-      IPAddress.fromNumeric(this._mask, this._baseIP.version).toString(),
-      this._baseIP.version
-    )
+    return IPAddress.fromNumeric(this._mask, this._baseIP.version)
   }
 
   public getHostMaskAddress() {
-    return IPAddress.fromNumeric(
-      this._hostMask,
-      this._baseIP.version
-    ).toString()
+    return IPAddress.fromNumeric(this._hostMask, this._baseIP.version)
   }
 
   public getFirstUsableAddress() {
