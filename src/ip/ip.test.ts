@@ -73,7 +73,6 @@ describe("IPAddress", () => {
 
 it("ipv6 address families", () => {
   let ip = IPAddress.parse("fdf8:f53b:82e4::53")
-  console.log(ip.toInt().toString(16))
   expect(ip.getIPAddressType()).toBe("Private")
 
   ip = IPAddress.parse("::")
@@ -82,7 +81,6 @@ it("ipv6 address families", () => {
   ip = IPAddress.parse("::1")
   expect(ip.getIPAddressType()).toBe("Loopback")
 
-  /*   ip = IPAddress.parse("::ffff:192.168.0.1")
-  console.log(ip.toInt().toString(16))
-  expect(ip.getIPAddressType()).toBe("IPV4-Mapped") */
+  ip = IPAddress.parse("::ffff:192.168.0.1")
+  expect(ip.getIPAddressType()).toBe("IPV4-Mapped")
 })
