@@ -70,3 +70,17 @@ describe("IPAddress", () => {
     expect(ip.getIPAddressType()).toBe("Private")
   })
 })
+
+it("ipv6 address families", () => {
+  let ip = IPAddress.parse("fdf8:f53b:82e4::53")
+  expect(ip.getIPAddressType()).toBe("Private")
+
+  ip = IPAddress.parse("::")
+  expect(ip.getIPAddressType()).toBe("Software")
+
+  ip = IPAddress.parse("::1")
+  expect(ip.getIPAddressType()).toBe("Loopback")
+
+  ip = IPAddress.parse("::ffff:192.168.0.1")
+  expect(ip.getIPAddressType()).toBe("IPV4-Mapped")
+})

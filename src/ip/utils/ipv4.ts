@@ -116,3 +116,12 @@ export function getIPV4AddressType(integer: bigint) {
 
   return "Public"
 }
+
+export function ipv4ToInt(ip: string): bigint {
+  const octets = ip.split(".")
+  const value = octets
+    .map(BigInt)
+    .reduce((acc, octet) => (acc << 8n) + octet, 0n)
+
+  return BigInt.asUintN(32, value)
+}

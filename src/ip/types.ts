@@ -19,15 +19,18 @@ export type IPv4Types =
   | "Other"
 
 export type IPv6Types =
-  | "Public"
-  | "Private"
   | "Software"
   | "Loopback"
-  | "Link-Local"
   | "Documentation"
+  | "IPV4-Mapped"
+  | "Benchmarking"
+  | "Orchid"
+  | "6to4"
   | "Multicast"
-  | "Discard"
+  | "Teredo"
+  | "Public"
+  | "Private"
+  | "Link-Local"
   | "Future"
-  | "Other"
 
 export type IPAddressTypes = IPv4Types | IPv6Types
