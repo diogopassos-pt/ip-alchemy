@@ -81,7 +81,7 @@ export function getIPV6AddressType(integer: bigint): IPv6Types {
   if (ipString.startsWith("20010db8")) return "Documentation" //2001:0db8::/32
   if (ipString.startsWith("200100020000")) return "Benchmarking"
   if (ipString.startsWith("2001001")) return "Orchid"
-  if (ipString.startsWith("0002")) return "6to4"
+  if (ipString.startsWith("2002")) return "6to4"
   if (ipString.startsWith("ff")) return "Multicast" //ff00::/8
   if (ipString.startsWith("20010000")) return "Teredo" // 2001:0000::/32
   if (ipString.startsWith("2") || ipString.startsWith("3")) return "Public"
