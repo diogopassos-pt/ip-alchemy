@@ -18,9 +18,7 @@ Just install with your favorite dependency manager
 
 ## Usage
 
-```typescript
-Work in progress
-```
+See [Docs]("./docs")
 
 ## Contributing
 
