@@ -1,5 +1,6 @@
-import type { IPAddressTypes, IPObject, IPVersion, IPv6Types } from "./types"
-import { getIPV4AddressType } from "./utils/ipv4"
+import type { IPAddressTypes, IPObject, IPVersion } from "./types"
+import { getIPV4AddressType, ipv4ToInt } from "./utils/ipv4"
+import { getIPV6AddressType, ipv6ToInt } from "./utils/ipv6"
 import { checkIPVersion } from "./utils/version"
 
 export class IPAddress {
@@ -14,7 +15,7 @@ export class IPAddress {
     return {
       ip: ip,
       version: ipType,
-      numericIp: ipType === "v4" ? this.ipv4ToInt(ip) : this.ipv6ToInt(ip),
+      numericIp: ipType === "v4" ? ipv4ToInt(ip) : ipv6ToInt(ip),
     }
   }
 
@@ -40,7 +41,7 @@ export class IPAddress {
   private intToIpv6(integer: bigint) {
     const hexString = integer.toString(16).padStart(32, "0")
     // Split the string into 8 groups of 4 characters
-    const groups = hexString.match(/.{1,4}/g) || []
+    const groups = hexString.match(/.{1,4}/g) ?? []
 
     // Remove leading zeros from each segment
     const compactGroups = groups.map(segment => segment.replace(/^0+/, ""))
@@ -67,22 +68,6 @@ export class IPAddress {
     this._ip = data.ip
     this._numeric_ip = data.numericIp
     this._version = data.version
-  }
-  private ipv4ToInt(ip: string): bigint {
-    const octets = ip.split(".")
-    const value = octets
-      .map(BigInt)
-      .reduce((acc, octet) => (acc << 8n) + octet, 0n)
-
-    return BigInt.asUintN(32, value)
-  }
-  private ipv6ToInt(ip: string): bigint {
-    const groups = ip.split(":")
-    const expandedGroups = groups.map(group => {
-      return group.length < 4 ? group.padStart(4, "0") : group
-    })
-    const hexString = expandedGroups.join("")
-    return BigInt.asUintN(128, BigInt("0x" + hexString))
   }
 
   public toInt() {
@@ -179,16 +164,11 @@ export class IPAddress {
   public get version() {
     return this._version
   }
-
-  private getIPV6AddressType(): IPv6Types {
-    throw Error("Not implemented")
-  }
-
   public getIPAddressType(): IPAddressTypes {
     if (this._version === "v4") {
       return getIPV4AddressType(this._numeric_ip)
     } else {
-      return this.getIPV6AddressType()
+      return getIPV6AddressType(this._numeric_ip)
     }
   }
 
