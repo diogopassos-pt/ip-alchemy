@@ -19,13 +19,10 @@ export class IPAddress {
     }
   }
 
-  private constructByInt(ip: bigint) {
-    // convert to binary string and remove leading zeros
-    const numberOfBits = ip.toString(2).replace(/^0+/, "").length
-
+  private constructByInt(ip: bigint, version: IPVersion) {
     return {
-      ip: numberOfBits > 32 ? this.intToIpv6(ip) : this.intToIpv4(ip),
-      version: numberOfBits > 32 ? "v6" : ("v4" as IPVersion),
+      ip: version == "v6" ? this.intToIpv6(ip) : this.intToIpv4(ip),
+      version: version,
       numericIp: ip,
     }
   }
@@ -55,14 +52,13 @@ export class IPAddress {
       .replace(/:{3,}/, "::")
     return compactIPv6String
   }
-  private constructor(arg: string | bigint) {
+  private constructor(...args: [string] | [bigint, IPVersion]) {
     let data
-    if (typeof arg === "bigint") {
-      data = this.constructByInt(arg)
-    } else if (typeof arg === "string") {
-      data = this.constructByString(arg)
+
+    if (args.length == 2) {
+      data = this.constructByInt(args[0], args[1])
     } else {
-      throw new Error(`Invalid Argument: ${arg}`)
+      data = this.constructByString(args[0])
     }
 
     this._ip = data.ip
@@ -103,8 +99,8 @@ export class IPAddress {
    * @param {bigint} integer - the numeric value for the IPAddress
    * @return {IPAddress} the new IPAddress object
    */
-  static fromNumeric(integer: bigint) {
-    return new IPAddress(integer)
+  static fromNumeric(integer: bigint, version: IPVersion) {
+    return new IPAddress(integer, version)
   }
 
   /**
@@ -145,7 +141,7 @@ export class IPAddress {
         (BigInt(bytes[2]) << 8n) +
         BigInt(bytes[3])
 
-      return IPAddress.fromNumeric(integer)
+      return IPAddress.fromNumeric(integer, "v4")
     }
 
     if (bytes.length === 16) {
@@ -155,7 +151,7 @@ export class IPAddress {
         0n
       )
 
-      return IPAddress.fromNumeric(integer)
+      return IPAddress.fromNumeric(integer, "v6")
     }
 
     throw new Error("Invalid IP byte array")

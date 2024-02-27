@@ -6,4 +6,10 @@ describe("CIDR", () => {
     expect(cidr.getNetworkAddress().version).toBe("v4")
     expect(cidr.getNetworkType()).toBe("Loopback")
   })
+
+  it("should create an valid ipv6 CIDR object", () => {
+    const cidr = CIDR.parse("::1/128")
+    expect(cidr.getNetworkAddress().version).toBe("v6")
+    expect(cidr.getNetworkType()).toBe("Loopback")
+  })
 })
